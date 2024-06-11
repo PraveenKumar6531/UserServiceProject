@@ -10,6 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.xml.crypto.Data;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
 
@@ -47,8 +49,11 @@ public class UserService {
         if(!isMatched) {
             throw new UserNotFoundException("Password for " + user.getName() + " did not match");
         }
+        LocalDate currentDate = LocalDate.now();
+        LocalDate thirtyDaysLater = currentDate.plusDays(30);
+        Date expiryDate = Date.from(thirtyDaysLater.atStartOfDay(ZoneId.systemDefault()).toInstant());
         token.setUser(user);
-        token.setExpiryAt(new Date());
+        token.setExpiryAt(expiryDate);
         token.setValue(RandomStringUtils.randomAlphanumeric(128));
         tokenRepository.save(token);
         return token;
